@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Confirma tu datos - Treinta Aniversario</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Judson:ital,wght@0,400;0,700;1,400&display=swap"
+        rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&display=swap"
+        rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <div class="cnter">
+        <div class="container">
+            <div class="header-row">
+                <h1 class="main-title">
+                    Confirma tu <span class="highlight">datos</span>
+                </h1>
+                <div class="logo">
+                    <img src="assets/logo.png" alt="Logo GL MA" class="logo-image">
+                </div>
+            </div>
+            <div class="organizers">
+                <div class="line"></div>
+                <div class="organizer-names">
+                    <span class="organizer">RAMIRO GONZÁLEZ LUNA</span>
+                    <span class="separator">|</span>
+                    <span class="organizer">DIEGO ARMIDA</span>
+                    <span class="separator">|</span>
+                    <span class="organizer">DIEGO GARCÍA PIMENTEL</span>
+                    <span class="separator">|</span>
+                    <span class="organizer">FERNANDA ESTRADA</span>
+                </div>
+            </div>
+            <div class="event-type-container padding-top">
+                <!-- Left Section - Event Details -->
+                <div class="left-section">
+
+                    <div class="event-type">COCKTAIL</div>
+
+                    <div class="event-name">
+                        <span class="highlight">TREINTA</span> ANIVERSARIO
+                    </div>
+                    <div class="event-line"></div>
+
+                    <div class="event-no-asistensia">
+                        <h6>Lamentamos no poder verte este año. Te pedimos <br> proporcionarnos tus datos para mantener
+                            tu registro <br> actualizado</h6>
+                    </div>
+                </div>
+
+                <!-- Right Section - Personal Data Form -->
+                <div class="right-section">
+
+                    <form id="rsvpForm" class="rsvp-form">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <input type="text" id="nombre" name="nombre" placeholder="Nombre" required>
+                            </div>
+                            <div class="form-group">
+                                <input type="text" id="apellido" name="apellido" placeholder="Apellido" required>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <input type="email" id="email" name="email" placeholder="Email" required>
+                            </div>
+                            <div class="form-group">
+                                <input type="tel" id="telefono" name="telefono" placeholder="Teléfono" required>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="submit-btn">FINALIZAR</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="script.js"></script>
+</body>
+
+</html>
