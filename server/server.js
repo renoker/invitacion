@@ -37,13 +37,73 @@ app.get('/health', (req, res) => {
     });
 });
 
+// Database health check endpoint
+app.get('/health/db', async (req, res) => {
+    try {
+        // Test database connection
+        const connection = await pool.getConnection();
+        await connection.ping();
+        connection.release();
+
+        // Test basic query
+        const [rows] = await pool.execute('SELECT COUNT(*) as count FROM invitados');
+
+        res.json({
+            status: 'OK',
+            message: 'Base de datos funcionando correctamente',
+            database: {
+                connected: true,
+                totalRecords: rows[0].count,
+                config: {
+                    host: process.env.DB_HOST || 'localhost',
+                    user: process.env.DB_USER || 'tnb',
+                    database: process.env.DB_NAME || 'invitacion',
+                    port: process.env.DB_PORT || 3306
+                }
+            },
+            timestamp: new Date().toISOString()
+        });
+    } catch (error) {
+        console.error('❌ Error en health check de base de datos:', error);
+        res.status(503).json({
+            status: 'ERROR',
+            message: 'Error de conexión a la base de datos',
+            database: {
+                connected: false,
+                error: error.message,
+                config: {
+                    host: process.env.DB_HOST || 'localhost',
+                    user: process.env.DB_USER || 'tnb',
+                    database: process.env.DB_NAME || 'invitacion',
+                    port: process.env.DB_PORT || 3306
+                }
+            },
+            timestamp: new Date().toISOString()
+        });
+    }
+});
+
 // RSVP endpoint
 app.post('/api/rsvp', async (req, res) => {
+    const requestId = Date.now() + Math.random().toString(36).substr(2, 9);
+    console.log(`\n🚀 [${requestId}] Nueva solicitud RSVP recibida:`, {
+        timestamp: new Date().toISOString(),
+        body: req.body,
+        ip: req.ip || req.connection.remoteAddress
+    });
+
     try {
         const { nombre, apellido, email, telefono, numAsistentes } = req.body;
 
         // Validate required fields
         if (!nombre || !apellido || !email || !telefono || !numAsistentes) {
+            console.log(`❌ [${requestId}] Validación fallida - campos requeridos faltantes:`, {
+                nombre: !!nombre,
+                apellido: !!apellido,
+                email: !!email,
+                telefono: !!telefono,
+                numAsistentes: !!numAsistentes
+            });
             return res.status(400).json({
                 success: false,
                 message: 'Todos los campos son requeridos'
@@ -53,6 +113,7 @@ app.post('/api/rsvp', async (req, res) => {
         // Validate email format
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegex.test(email)) {
+            console.log(`❌ [${requestId}] Validación fallida - formato de email inválido:`, email);
             return res.status(400).json({
                 success: false,
                 message: 'Formato de email inválido'
@@ -61,19 +122,45 @@ app.post('/api/rsvp', async (req, res) => {
 
         // Validate number of attendees
         if (numAsistentes < 1 || numAsistentes > 10) {
+            console.log(`❌ [${requestId}] Validación fallida - número de asistentes inválido:`, numAsistentes);
             return res.status(400).json({
                 success: false,
                 message: 'El número de asistentes debe estar entre 1 y 10'
             });
         }
 
+        console.log(`✅ [${requestId}] Validaciones pasadas, procediendo con verificación de email duplicado...`);
+
         // Check if email already exists
-        const [existingRows] = await pool.execute(
-            'SELECT id FROM invitados WHERE email = ?',
-            [email]
-        );
+        let existingRows;
+        try {
+            console.log(`🔍 [${requestId}] Verificando email duplicado en base de datos:`, email);
+            [existingRows] = await pool.execute(
+                'SELECT id FROM invitados WHERE email = ?',
+                [email]
+            );
+            console.log(`📊 [${requestId}] Resultado de verificación de email:`, {
+                email: email,
+                found: existingRows.length > 0,
+                rows: existingRows
+            });
+        } catch (dbError) {
+            console.error(`❌ [${requestId}] Error de conexión a base de datos:`, {
+                error: dbError.message,
+                code: dbError.code,
+                errno: dbError.errno,
+                sqlState: dbError.sqlState,
+                sqlMessage: dbError.sqlMessage
+            });
+            return res.status(503).json({
+                success: false,
+                message: 'Error de conexión a la base de datos. Por favor, intenta más tarde.',
+                error: process.env.NODE_ENV === 'development' ? dbError.message : 'Error de conexión'
+            });
+        }
 
         if (existingRows.length > 0) {
+            console.log(`⚠️ [${requestId}] Email ya existe en la base de datos:`, email);
             return res.status(409).json({
                 success: false,
                 message: 'Este email ya ha sido registrado anteriormente'
@@ -81,12 +168,41 @@ app.post('/api/rsvp', async (req, res) => {
         }
 
         // Insert new RSVP
-        const [result] = await pool.execute(
-            'INSERT INTO invitados (nombre, apellido, email, telefono, num_asistentes) VALUES (?, ?, ?, ?, ?)',
-            [nombre, apellido, email, telefono, numAsistentes]
-        );
+        let result;
+        try {
+            console.log(`💾 [${requestId}] Insertando nuevo RSVP en base de datos:`, {
+                nombre,
+                apellido,
+                email,
+                telefono,
+                numAsistentes
+            });
+            [result] = await pool.execute(
+                'INSERT INTO invitados (nombre, apellido, email, telefono, num_asistentes) VALUES (?, ?, ?, ?, ?)',
+                [nombre, apellido, email, telefono, numAsistentes]
+            );
+            console.log(`✅ [${requestId}] RSVP insertado exitosamente:`, {
+                insertId: result.insertId,
+                affectedRows: result.affectedRows,
+                changedRows: result.changedRows
+            });
+        } catch (dbError) {
+            console.error(`❌ [${requestId}] Error insertando en base de datos:`, {
+                error: dbError.message,
+                code: dbError.code,
+                errno: dbError.errno,
+                sqlState: dbError.sqlState,
+                sqlMessage: dbError.sqlMessage,
+                sql: dbError.sql
+            });
+            return res.status(503).json({
+                success: false,
+                message: 'Error guardando los datos. Por favor, intenta más tarde.',
+                error: process.env.NODE_ENV === 'development' ? dbError.message : 'Error de conexión'
+            });
+        }
 
-        console.log(`✅ Nuevo RSVP registrado: ${nombre} ${apellido} (${email}) - ${numAsistentes} asistentes`);
+        console.log(`🎉 [${requestId}] RSVP completado exitosamente: ${nombre} ${apellido} (${email}) - ${numAsistentes} asistentes`);
 
         res.status(200).json({
             success: true,
@@ -103,7 +219,11 @@ app.post('/api/rsvp', async (req, res) => {
         });
 
     } catch (error) {
-        console.error('❌ Error en endpoint /api/rsvp:', error);
+        console.error(`❌ [${requestId}] Error general en endpoint /api/rsvp:`, {
+            error: error.message,
+            stack: error.stack,
+            name: error.name
+        });
         res.status(500).json({
             success: false,
             message: 'Error interno del servidor',
@@ -114,10 +234,16 @@ app.post('/api/rsvp', async (req, res) => {
 
 // Get all RSVPs (for admin purposes)
 app.get('/api/rsvp', async (req, res) => {
+    const requestId = Date.now() + Math.random().toString(36).substr(2, 9);
+    console.log(`\n📋 [${requestId}] Solicitud GET /api/rsvp recibida`);
+
     try {
+        console.log(`🔍 [${requestId}] Ejecutando consulta para obtener todos los invitados...`);
         const [rows] = await pool.execute(
             'SELECT * FROM invitados ORDER BY fecha_registro DESC'
         );
+
+        console.log(`✅ [${requestId}] Consulta exitosa, ${rows.length} invitados encontrados`);
 
         res.status(200).json({
             success: true,
@@ -126,17 +252,28 @@ app.get('/api/rsvp', async (req, res) => {
         });
 
     } catch (error) {
-        console.error('❌ Error obteniendo RSVPs:', error);
-        res.status(500).json({
+        console.error(`❌ [${requestId}] Error obteniendo RSVPs:`, {
+            error: error.message,
+            code: error.code,
+            errno: error.errno,
+            sqlState: error.sqlState,
+            sqlMessage: error.sqlMessage
+        });
+        res.status(503).json({
             success: false,
-            message: 'Error interno del servidor'
+            message: 'Error de conexión a la base de datos. Por favor, intenta más tarde.',
+            error: process.env.NODE_ENV === 'development' ? error.message : 'Error de conexión'
         });
     }
 });
 
 // Get RSVP statistics
 app.get('/api/stats', async (req, res) => {
+    const requestId = Date.now() + Math.random().toString(36).substr(2, 9);
+    console.log(`\n📊 [${requestId}] Solicitud GET /api/stats recibida`);
+
     try {
+        console.log(`🔍 [${requestId}] Ejecutando consultas de estadísticas...`);
         const [totalRows] = await pool.execute('SELECT COUNT(*) as total FROM invitados');
         const [asistentesRows] = await pool.execute('SELECT SUM(num_asistentes) as total_asistentes FROM invitados');
 
@@ -145,16 +282,25 @@ app.get('/api/stats', async (req, res) => {
             totalAsistentes: asistentesRows[0].total_asistentes || 0
         };
 
+        console.log(`✅ [${requestId}] Estadísticas calculadas:`, stats);
+
         res.status(200).json({
             success: true,
             data: stats
         });
 
     } catch (error) {
-        console.error('❌ Error obteniendo estadísticas:', error);
-        res.status(500).json({
+        console.error(`❌ [${requestId}] Error obteniendo estadísticas:`, {
+            error: error.message,
+            code: error.code,
+            errno: error.errno,
+            sqlState: error.sqlState,
+            sqlMessage: error.sqlMessage
+        });
+        res.status(503).json({
             success: false,
-            message: 'Error interno del servidor'
+            message: 'Error de conexión a la base de datos. Por favor, intenta más tarde.',
+            error: process.env.NODE_ENV === 'development' ? error.message : 'Error de conexión'
         });
     }
 });
