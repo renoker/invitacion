@@ -19,11 +19,21 @@ body {
     justify-content: center;
     align-items: center;
     height: 100vh;
+
+    @media (max-width: 768px) {
+        width: 90%;
+        margin: 0 auto 3rem auto;
+        height: 100%;
+    }
 }
 
 .container {
     max-width: 1400px;
     margin: 0 auto;
+
+    @media (max-width: 768px) {
+        max-width: 100%;
+    }
 }
 
 .event-type-container {
@@ -31,6 +41,10 @@ body {
     flex-direction: row;
     justify-content: space-between;
     align-items: flex-start;
+
+    @media (max-width: 768px) {
+        flex-direction: column;
+    }
 }
 
 /* Left Section - Event Details */
@@ -39,6 +53,10 @@ body {
     display: flex;
     flex-direction: column;
     position: relative;
+
+    @media (max-width: 768px) {
+        width: 100%;
+    }
 }
 
 .header-row {
@@ -52,13 +70,21 @@ body {
 .logo {
     width: 16%;
     flex-shrink: 0;
+
+    @media (max-width: 768px) {
+        width: 20%;
+    }
 }
 
 .logo-image {
     max-height: 100px;
     width: auto;
     filter: brightness(0) invert(1);
+
     /* Hace el logo blanco */
+    @media (max-width: 768px) {
+        max-height: 80px;
+    }
 }
 
 .main-title {
@@ -84,12 +110,20 @@ body {
     align-items: center;
     gap: 20px;
     margin-bottom: 30px;
+
+    @media (max-width: 768px) {
+        flex-direction: column-reverse;
+    }
 }
 
 .line {
     width: 261px;
     height: 2px;
     background-color: #FFFFFF;
+
+    @media (max-width: 768px) {
+        width: 100%;
+    }
 }
 
 .organizer-names {
@@ -103,6 +137,10 @@ body {
     line-height: 1.2;
     letter-spacing: 0.25em;
     text-transform: uppercase;
+
+    @media (max-width: 768px) {
+        flex-wrap: wrap;
+    }
 }
 
 .organizer {
@@ -142,6 +180,10 @@ body {
     height: 3px;
     background-color: #B73B0F;
     margin-bottom: 40px;
+
+    @media (max-width: 768px) {
+        width: 100%;
+    }
 }
 
 .event-details {
@@ -217,6 +259,10 @@ body {
     display: flex;
     flex-direction: column;
     justify-content: center;
+
+    @media (max-width: 768px) {
+        width: 100%;
+    }
 }
 
 .form-title {
@@ -336,6 +382,7 @@ body {
     .main-title {
         font-size: 36px;
         margin-top: 60px;
+        width: 60%;
     }
 
     .event-type {

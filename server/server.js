@@ -13,8 +13,18 @@ app.use(express.urlencoded({ extended: true }));
 
 // Serve static files (HTML, CSS, JS)
 app.use(express.static('../'));
+
+// Routes without .html extension
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, '../index.html'));
+});
+
+app.get('/no-asistencia', (req, res) => {
+    res.sendFile(path.join(__dirname, '../no-asistensia.html'));
+});
+
+app.get('/admin', (req, res) => {
+    res.sendFile(path.join(__dirname, '../admin.html'));
 });
 
 // Health check endpoint
