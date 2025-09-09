@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
+require('dotenv').config();
 const { pool, testConnection, initializeDatabase } = require('./config/db');
 
 const app = express();
@@ -179,9 +180,20 @@ app.use('*', (req, res) => {
 async function startServer() {
     try {
         // Test database connection
+        console.log('🔍 Configuración de base de datos:');
+        console.log(`   Host: ${process.env.DB_HOST || 'localhost'}`);
+        console.log(`   User: ${process.env.DB_USER || 'tnb'}`);
+        console.log(`   Database: ${process.env.DB_NAME || 'invitacion'}`);
+        console.log(`   Port: ${process.env.DB_PORT || 3306}`);
+
         const dbConnected = await testConnection();
         if (!dbConnected) {
             console.error('❌ No se pudo conectar a la base de datos. Verifica tu configuración de MySQL.');
+            console.error('💡 Asegúrate de que:');
+            console.error('   1. MySQL esté instalado y corriendo');
+            console.error('   2. Las credenciales sean correctas');
+            console.error('   3. El usuario tenga permisos para crear bases de datos');
+            console.error('   4. El puerto 3306 esté abierto');
             process.exit(1);
         }
 
