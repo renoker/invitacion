@@ -26,8 +26,8 @@ document.addEventListener('DOMContentLoaded', function () {
         submitBtn.disabled = true;
 
         try {
-            // Send data to backend
-            const response = await axios.post('http://localhost:3000/api/rsvp', formData);
+            // Send data to backend using dynamic API URL
+            const response = await axios.post(getApiUrl('/api/rsvp'), formData);
 
             if (response.status === 200) {
                 showMessage('¡Gracias por confirmar tu asistencia!', 'success');

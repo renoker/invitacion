@@ -234,6 +234,7 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="config.js"></script>
     <script>
         // Load guests data when page loads
         document.addEventListener('DOMContentLoaded', function () {
@@ -243,7 +244,7 @@
 
         async function loadStats() {
             try {
-                const response = await axios.get('/api/stats');
+                const response = await axios.get(getApiUrl('/api/stats'));
                 if (response.data.success) {
                     document.getElementById('totalGuests').textContent = response.data.data.totalInvitados;
                     document.getElementById('totalAttendees').textContent = response.data.data.totalAsistentes;
@@ -258,7 +259,7 @@
             contentDiv.innerHTML = '<div class="loading">Cargando invitados...</div>';
 
             try {
-                const response = await axios.get('/api/rsvp');
+                const response = await axios.get(getApiUrl('/api/rsvp'));
 
                 if (response.data.success && response.data.data.length > 0) {
                     const guests = response.data.data;
