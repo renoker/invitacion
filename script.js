@@ -35,16 +35,24 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         } catch (error) {
             console.error('Error sending RSVP:', error);
+            console.error('Error details:', {
+                message: error.message,
+                response: error.response?.data,
+                status: error.response?.status,
+                statusText: error.response?.statusText
+            });
 
             if (error.response) {
                 // Server responded with error
-                showMessage(`Error: ${error.response.data.message || 'Error del servidor'}`, 'error');
+                const errorMessage = error.response.data?.message ||
+                    `Error del servidor (${error.response.status}: ${error.response.statusText})`;
+                showMessage(`Error: ${errorMessage}`, 'error');
             } else if (error.request) {
                 // No response received
                 showMessage('Error: No se pudo conectar con el servidor. Verifica que esté ejecutándose.', 'error');
             } else {
                 // Other error
-                showMessage('Error: Ocurrió un problema inesperado.', 'error');
+                showMessage(`Error: ${error.message || 'Ocurrió un problema inesperado.'}`, 'error');
             }
         } finally {
             // Restore button state
