@@ -84,8 +84,8 @@ function validateForm(data) {
         return false;
     }
 
-    if (!data.numAsistentes || data.numAsistentes < 1 || data.numAsistentes > 10) {
-        showMessage('Por favor ingresa un número válido de asistentes (1-10)', 'error');
+    if (!data.numAsistentes || data.numAsistentes < 1) {
+        showMessage('Por favor ingresa un número válido de asistentes (mínimo 1)', 'error');
         return false;
     }
 

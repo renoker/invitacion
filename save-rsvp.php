@@ -35,8 +35,8 @@ if (!$input) {
     $input = $_POST;
 }
 
-// Validar que todos los campos estén presentes
-$required_fields = ['nombre', 'apellido', 'email', 'telefono', 'numAsistentes'];
+// Validar que los campos básicos estén presentes
+$required_fields = ['nombre', 'apellido', 'email', 'telefono'];
 foreach ($required_fields as $field) {
     if (!isset($input[$field]) || empty(trim($input[$field]))) {
         http_response_code(400);
@@ -53,7 +53,9 @@ $nombre = trim($input['nombre']);
 $apellido = trim($input['apellido']);
 $email = trim($input['email']);
 $telefono = trim($input['telefono']);
-$numAsistentes = intval($input['numAsistentes']);
+
+// numAsistentes es opcional, por defecto 0 (no asistencia)
+$numAsistentes = isset($input['numAsistentes']) ? intval($input['numAsistentes']) : 0;
 
 // Validaciones adicionales
 if (strlen($nombre) < 2) {
@@ -92,11 +94,12 @@ if (strlen($telefono) < 10) {
     exit;
 }
 
-if ($numAsistentes < 1 || $numAsistentes > 10) {
+// Solo validar que numAsistentes sea un número positivo si es mayor a 0
+if ($numAsistentes > 0 && $numAsistentes < 1) {
     http_response_code(400);
     echo json_encode([
         'success' => false,
-        'message' => 'El número de asistentes debe estar entre 1 y 10'
+        'message' => 'El número de asistentes debe ser mayor a 0'
     ]);
     exit;
 }

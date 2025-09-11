@@ -5,13 +5,13 @@ document.addEventListener('DOMContentLoaded', function () {
     form.addEventListener('submit', async function (e) {
         e.preventDefault();
 
-        // Get form data (without numAsistentes)
+        // Get form data (without numAsistentes field)
         const formData = {
             nombre: document.getElementById('nombre').value.trim(),
             apellido: document.getElementById('apellido').value.trim(),
             email: document.getElementById('email').value.trim(),
-            telefono: document.getElementById('telefono').value.trim(),
-            numAsistentes: 0 // No asistencia = 0 asistentes
+            telefono: document.getElementById('telefono').value.trim()
+            // numAsistentes se maneja automáticamente en PHP (por defecto 0)
         };
 
         // Validate form data
@@ -62,7 +62,7 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 });
 
-// Form validation for no-asistencia (without numAsistentes validation)
+// Form validation for no-asistencia (only basic fields)
 function validateFormNoAsistencia(data) {
     if (!data.nombre || data.nombre.length < 2) {
         showMessage('Por favor ingresa un nombre válido (mínimo 2 caracteres)', 'error');
