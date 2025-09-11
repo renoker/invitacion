@@ -181,6 +181,55 @@
             background: #2980b9;
         }
 
+        /* Tabs Styles */
+        .tabs-container {
+            background: #f8f9fa;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .tabs-nav {
+            display: flex;
+            margin: 0;
+            padding: 0;
+        }
+
+        .tab-btn {
+            background: none;
+            border: none;
+            padding: 15px 25px;
+            cursor: pointer;
+            font-family: 'Inter', sans-serif;
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: #6c757d;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s ease;
+            flex: 1;
+        }
+
+        .tab-btn:hover {
+            background: #e9ecef;
+            color: #495057;
+        }
+
+        .tab-btn.active {
+            color: #2c3e50;
+            border-bottom-color: #3498db;
+            background: white;
+        }
+
+        .tab-content {
+            background: white;
+        }
+
+        .tab-panel {
+            display: none;
+        }
+
+        .tab-panel.active {
+            display: block;
+        }
+
         @media (max-width: 768px) {
             .admin-container {
                 padding: 10px;
@@ -198,6 +247,11 @@
             .stats-container {
                 grid-template-columns: 1fr;
             }
+
+            .tab-btn {
+                padding: 12px 15px;
+                font-size: 0.8rem;
+            }
         }
     </style>
 </head>
@@ -212,11 +266,15 @@
         <div class="stats-container">
             <div class="stat-card">
                 <h3 class="stat-number" id="totalGuests">-</h3>
-                <p class="stat-label">Total Invitados</p>
+                <p class="stat-label">Total Registrados</p>
             </div>
             <div class="stat-card">
                 <h3 class="stat-number" id="totalAttendees">-</h3>
                 <p class="stat-label">Total Asistentes</p>
+            </div>
+            <div class="stat-card">
+                <h3 class="stat-number" id="totalNotAttending">-</h3>
+                <p class="stat-label">No Asistirán</p>
             </div>
         </div>
 
@@ -228,8 +286,30 @@
                 </h2>
             </div>
 
-            <div id="guestsContent">
-                <div class="loading">Cargando invitados...</div>
+            <!-- Tabs Navigation -->
+            <div class="tabs-container">
+                <div class="tabs-nav">
+                    <button class="tab-btn active" onclick="switchTab('asistentes')" id="tab-asistentes">
+                        Asistentes (<span id="count-asistentes">0</span>)
+                    </button>
+                    <button class="tab-btn" onclick="switchTab('no-asistentes')" id="tab-no-asistentes">
+                        No Asistirán (<span id="count-no-asistentes">0</span>)
+                    </button>
+                </div>
+            </div>
+
+            <!-- Tab Content -->
+            <div class="tab-content">
+                <div id="tab-content-asistentes" class="tab-panel active">
+                    <div id="guestsContentAsistentes">
+                        <div class="loading">Cargando asistentes...</div>
+                    </div>
+                </div>
+                <div id="tab-content-no-asistentes" class="tab-panel">
+                    <div id="guestsContentNoAsistentes">
+                        <div class="loading">Cargando no asistentes...</div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -243,12 +323,35 @@
             loadStats();
         });
 
+        // Tab switching functionality
+        function switchTab(tabName) {
+            // Remove active class from all tabs and panels
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-panel').forEach(panel => panel.classList.remove('active'));
+
+            // Add active class to selected tab and panel
+            document.getElementById(`tab-${tabName}`).classList.add('active');
+            document.getElementById(`tab-content-${tabName}`).classList.add('active');
+
+            // Load data for the selected tab
+            if (tabName === 'asistentes') {
+                loadAsistentes();
+            } else if (tabName === 'no-asistentes') {
+                loadNoAsistentes();
+            }
+        }
+
         async function loadStats() {
             try {
                 const response = await axios.get('admin-data.php?action=stats');
                 if (response.data.success) {
                     document.getElementById('totalGuests').textContent = response.data.data.totalInvitados;
                     document.getElementById('totalAttendees').textContent = response.data.data.totalAsistentes;
+                    document.getElementById('totalNotAttending').textContent = response.data.data.totalNoAsistentes;
+
+                    // Update tab counts
+                    document.getElementById('count-asistentes').textContent = response.data.data.totalAsistentes;
+                    document.getElementById('count-no-asistentes').textContent = response.data.data.totalNoAsistentes;
                 }
             } catch (error) {
                 console.error('Error loading stats:', error);
@@ -256,64 +359,93 @@
         }
 
         async function loadGuests() {
-            const contentDiv = document.getElementById('guestsContent');
-            contentDiv.innerHTML = '<div class="loading">Cargando invitados...</div>';
+            // Load both tabs
+            loadAsistentes();
+            loadNoAsistentes();
+        }
+
+        async function loadAsistentes() {
+            const contentDiv = document.getElementById('guestsContentAsistentes');
+            contentDiv.innerHTML = '<div class="loading">Cargando asistentes...</div>';
 
             try {
-                const response = await axios.get('admin-data.php');
+                const response = await axios.get('admin-data.php?action=asistentes');
 
                 if (response.data.success && response.data.data.length > 0) {
                     const guests = response.data.data;
-
-                    let tableHTML = `
-                        <table class="guests-table">
-                            <thead>
-                                <tr>
-                                    <th>Nombre</th>
-                                    <th>Email</th>
-                                    <th>Teléfono</th>
-                                    <th>Asistentes</th>
-                                    <th>Fecha Registro</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                    `;
-
-                    guests.forEach(guest => {
-                        const registerDate = new Date(guest.fecha_registro).toLocaleDateString('es-ES', {
-                            year: 'numeric',
-                            month: 'short',
-                            day: 'numeric',
-                            hour: '2-digit',
-                            minute: '2-digit'
-                        });
-
-                        tableHTML += `
-                            <tr>
-                                <td class="guest-name">${guest.nombre} ${guest.apellido}</td>
-                                <td class="guest-email">${guest.email}</td>
-                                <td>${guest.telefono}</td>
-                                <td>
-                                    <span class="guest-attendees">${guest.num_asistentes}</span>
-                                </td>
-                                <td class="guest-date">${registerDate}</td>
-                            </tr>
-                        `;
-                    });
-
-                    tableHTML += `
-                            </tbody>
-                        </table>
-                    `;
-
-                    contentDiv.innerHTML = tableHTML;
+                    contentDiv.innerHTML = generateTableHTML(guests, true);
                 } else {
-                    contentDiv.innerHTML = '<div class="loading">No hay invitados registrados aún.</div>';
+                    contentDiv.innerHTML = '<div class="loading">No hay asistentes registrados aún.</div>';
                 }
             } catch (error) {
-                console.error('Error loading guests:', error);
-                contentDiv.innerHTML = '<div class="error">Error al cargar los invitados. Por favor, intenta de nuevo.</div>';
+                console.error('Error loading asistentes:', error);
+                contentDiv.innerHTML = '<div class="error">Error al cargar los asistentes. Por favor, intenta de nuevo.</div>';
             }
+        }
+
+        async function loadNoAsistentes() {
+            const contentDiv = document.getElementById('guestsContentNoAsistentes');
+            contentDiv.innerHTML = '<div class="loading">Cargando no asistentes...</div>';
+
+            try {
+                const response = await axios.get('admin-data.php?action=no-asistentes');
+
+                if (response.data.success && response.data.data.length > 0) {
+                    const guests = response.data.data;
+                    contentDiv.innerHTML = generateTableHTML(guests, false);
+                } else {
+                    contentDiv.innerHTML = '<div class="loading">No hay registros de no asistentes aún.</div>';
+                }
+            } catch (error) {
+                console.error('Error loading no asistentes:', error);
+                contentDiv.innerHTML = '<div class="error">Error al cargar los no asistentes. Por favor, intenta de nuevo.</div>';
+            }
+        }
+
+        function generateTableHTML(guests, isAsistentes) {
+            const headers = isAsistentes ?
+                '<th>Nombre</th><th>Email</th><th>Teléfono</th><th>Asistentes</th><th>Fecha Registro</th>' :
+                '<th>Nombre</th><th>Email</th><th>Teléfono</th><th>Fecha Registro</th>';
+
+            let tableHTML = `
+                <table class="guests-table">
+                    <thead>
+                        <tr>
+                            ${headers}
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+
+            guests.forEach(guest => {
+                const registerDate = new Date(guest.fecha_registro).toLocaleDateString('es-ES', {
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+
+                const asistentesCell = isAsistentes ?
+                    `<td><span class="guest-attendees">${guest.num_asistentes}</span></td>` : '';
+
+                tableHTML += `
+                    <tr>
+                        <td class="guest-name">${guest.nombre} ${guest.apellido}</td>
+                        <td class="guest-email">${guest.email}</td>
+                        <td>${guest.telefono}</td>
+                        ${asistentesCell}
+                        <td class="guest-date">${registerDate}</td>
+                    </tr>
+                `;
+            });
+
+            tableHTML += `
+                    </tbody>
+                </table>
+            `;
+
+            return tableHTML;
         }
     </script>
 </body>

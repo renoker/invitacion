@@ -45,16 +45,78 @@ try {
         $stmt = $pdo->query("SELECT COUNT(*) as total FROM invitados");
         $totalInvitados = $stmt->fetch()['total'];
 
-        $stmt = $pdo->query("SELECT SUM(num_asistentes) as total_asistentes FROM invitados");
-        $totalAsistentes = $stmt->fetch()['total_asistentes'] ?? 0;
+        $stmt = $pdo->query("SELECT COUNT(*) as total FROM invitados WHERE num_asistentes > 0");
+        $totalAsistentes = $stmt->fetch()['total'];
+
+        $stmt = $pdo->query("SELECT COUNT(*) as total FROM invitados WHERE num_asistentes = 0");
+        $totalNoAsistentes = $stmt->fetch()['total'];
+
+        $stmt = $pdo->query("SELECT SUM(num_asistentes) as total_asistentes FROM invitados WHERE num_asistentes > 0");
+        $totalPersonasAsistentes = $stmt->fetch()['total_asistentes'] ?? 0;
 
         http_response_code(200);
         echo json_encode([
             'success' => true,
             'data' => [
                 'totalInvitados' => intval($totalInvitados),
-                'totalAsistentes' => intval($totalAsistentes)
+                'totalAsistentes' => intval($totalAsistentes),
+                'totalNoAsistentes' => intval($totalNoAsistentes),
+                'totalPersonasAsistentes' => intval($totalPersonasAsistentes)
             ]
+        ]);
+        exit;
+    }
+
+    // Verificar si se solicitan solo asistentes
+    if (isset($_GET['action']) && $_GET['action'] === 'asistentes') {
+        $stmt = $pdo->query("
+            SELECT 
+                id,
+                nombre,
+                apellido,
+                email,
+                telefono,
+                num_asistentes,
+                fecha_registro
+            FROM invitados 
+            WHERE num_asistentes > 0
+            ORDER BY fecha_registro DESC
+        ");
+
+        $invitados = $stmt->fetchAll();
+
+        http_response_code(200);
+        echo json_encode([
+            'success' => true,
+            'count' => count($invitados),
+            'data' => $invitados
+        ]);
+        exit;
+    }
+
+    // Verificar si se solicitan solo no asistentes
+    if (isset($_GET['action']) && $_GET['action'] === 'no-asistentes') {
+        $stmt = $pdo->query("
+            SELECT 
+                id,
+                nombre,
+                apellido,
+                email,
+                telefono,
+                num_asistentes,
+                fecha_registro
+            FROM invitados 
+            WHERE num_asistentes = 0
+            ORDER BY fecha_registro DESC
+        ");
+
+        $invitados = $stmt->fetchAll();
+
+        http_response_code(200);
+        echo json_encode([
+            'success' => true,
+            'count' => count($invitados),
+            'data' => $invitados
         ]);
         exit;
     }
