@@ -1,21 +1,21 @@
-// Form handling with Axios
+// Form handling for no-asistencia page
 document.addEventListener('DOMContentLoaded', function () {
     const form = document.getElementById('rsvpForm');
 
     form.addEventListener('submit', async function (e) {
         e.preventDefault();
 
-        // Get form data
+        // Get form data (without numAsistentes)
         const formData = {
             nombre: document.getElementById('nombre').value.trim(),
             apellido: document.getElementById('apellido').value.trim(),
             email: document.getElementById('email').value.trim(),
             telefono: document.getElementById('telefono').value.trim(),
-            numAsistentes: parseInt(document.getElementById('numAsistentes').value)
+            numAsistentes: 0 // No asistencia = 0 asistentes
         };
 
         // Validate form data
-        if (!validateForm(formData)) {
+        if (!validateFormNoAsistencia(formData)) {
             return;
         }
 
@@ -30,11 +30,11 @@ document.addEventListener('DOMContentLoaded', function () {
             const response = await axios.post('save-rsvp.php', formData);
 
             if (response.status === 200) {
-                showMessage('¡Gracias por confirmar tu asistencia!', 'success');
+                showMessage('¡Gracias por confirmar tus datos!', 'success');
                 form.reset();
             }
         } catch (error) {
-            console.error('Error sending RSVP:', error);
+            console.error('Error sending data:', error);
             console.error('Error details:', {
                 message: error.message,
                 response: error.response?.data,
@@ -62,8 +62,8 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 });
 
-// Form validation
-function validateForm(data) {
+// Form validation for no-asistencia (without numAsistentes validation)
+function validateFormNoAsistencia(data) {
     if (!data.nombre || data.nombre.length < 2) {
         showMessage('Por favor ingresa un nombre válido (mínimo 2 caracteres)', 'error');
         return false;
@@ -81,11 +81,6 @@ function validateForm(data) {
 
     if (!data.telefono || data.telefono.length < 10) {
         showMessage('Por favor ingresa un teléfono válido (mínimo 10 dígitos)', 'error');
-        return false;
-    }
-
-    if (!data.numAsistentes || data.numAsistentes < 1 || data.numAsistentes > 10) {
-        showMessage('Por favor ingresa un número válido de asistentes (1-10)', 'error');
         return false;
     }
 
@@ -146,19 +141,6 @@ function showMessage(message, type) {
             }, 300);
         }
     }, 5000);
-}
-
-// Navigation functions
-function openGoogleMaps() {
-    const address = 'Paseo de la Reforma 925, Lomas de Chapultepec, Ciudad de México';
-    const encodedAddress = encodeURIComponent(address);
-    window.open(`https://www.google.com/maps/search/?api=1&query=${encodedAddress}`, '_blank');
-}
-
-function openWaze() {
-    const address = 'Paseo de la Reforma 925, Lomas de Chapultepec, Ciudad de México';
-    const encodedAddress = encodeURIComponent(address);
-    window.open(`https://waze.com/ul?q=${encodedAddress}`, '_blank');
 }
 
 // Add CSS animations
