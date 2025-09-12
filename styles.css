@@ -12,6 +12,10 @@ body {
     color: white;
     min-height: 100vh;
     overflow-x: hidden;
+
+    @media (max-width: 768px) {
+        min-height: auto;
+    }
 }
 
 .cnter {
@@ -21,8 +25,7 @@ body {
     height: 100vh;
 
     @media (max-width: 768px) {
-        width: 90%;
-        margin: 0 auto 3rem auto;
+        margin-bottom: 5rem;
         height: 100%;
     }
 }
@@ -72,7 +75,8 @@ body {
     flex-shrink: 0;
 
     @media (max-width: 768px) {
-        width: 20%;
+        width: 100%;
+        text-align: center;
     }
 }
 
@@ -83,7 +87,7 @@ body {
 
     /* Hace el logo blanco */
     @media (max-width: 768px) {
-        max-height: 80px;
+        max-height: 41px;
     }
 }
 
@@ -97,6 +101,14 @@ body {
     line-height: 53px;
     margin: 0;
     flex: 1;
+
+    @media (max-width: 768px) {
+        width: 80%;
+        margin: 0 auto;
+        text-align: center;
+        font-size: 40px;
+        line-height: 43px;
+    }
 }
 
 .highlight {
@@ -140,6 +152,10 @@ body {
 
     @media (max-width: 768px) {
         flex-wrap: wrap;
+        justify-content: center;
+        font-size: 10px;
+        gap: 0;
+        row-gap: 10px;
     }
 }
 
@@ -163,6 +179,11 @@ body {
     line-height: auto;
     letter-spacing: 10px;
     color: #FFFFFF;
+
+    @media (max-width: 768px) {
+        font-size: 18px;
+        text-align: center;
+    }
 }
 
 .event-name {
@@ -173,6 +194,12 @@ body {
     line-height: 50px;
     letter-spacing: 10px;
     margin-bottom: 15px;
+
+    @media (max-width: 768px) {
+        font-size: 18px;
+        text-align: center;
+        letter-spacing: 5px;
+    }
 }
 
 .event-line {
@@ -182,12 +209,55 @@ body {
     margin-bottom: 40px;
 
     @media (max-width: 768px) {
-        width: 100%;
+        width: 80%;
+        margin: 40px auto;
     }
 }
 
 .event-details {
     margin-bottom: 50px;
+}
+
+.event-details-mobile {
+    width: 80%;
+    margin: 0 auto;
+    margin-bottom: 50px;
+}
+
+.detail-row {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.detail-text-mobile {
+    font-family: 'Archivo', sans-serif;
+    font-weight: 400;
+    font-style: normal;
+    font-size: 13px;
+}
+
+.detail-item-mobile {
+    width: 50%;
+    text-align: center;
+}
+
+.border-right {
+    border-right: 1px solid #B73B0F;
+}
+
+.detail-item-mobile-full {
+    width: 100%;
+    text-align: center;
+    margin-top: 20px;
+}
+
+.detail-text-2-mobile {
+    font-family: 'Archivo', sans-serif;
+    font-weight: 400;
+    font-style: normal;
+    font-size: 10px;
 }
 
 .detail-item {
@@ -226,6 +296,11 @@ body {
     display: flex;
     flex-direction: column;
     gap: 15px;
+
+    @media (max-width: 768px) {
+        width: 50%;
+        margin: 0 auto;
+    }
 }
 
 .nav-btn {
@@ -247,6 +322,10 @@ body {
     text-align: center;
     text-transform: uppercase;
 
+    @media (max-width: 768px) {
+        font-size: 13px;
+    }
+
 }
 
 .nav-btn:hover {
@@ -261,7 +340,8 @@ body {
     justify-content: center;
 
     @media (max-width: 768px) {
-        width: 100%;
+        width: 80%;
+        margin: 0 auto;
     }
 }
 
@@ -275,6 +355,12 @@ body {
     color: #FFFFFF;
     margin-bottom: 35px;
     margin-top: 20px;
+
+    @media (max-width: 768px) {
+        text-align: center;
+        margin-top: 35px;
+        margin-bottom: 20px;
+    }
 }
 
 .form-line {
@@ -323,6 +409,10 @@ body {
     letter-spacing: 0%;
     color: #FFFFFF;
     padding-left: 15px;
+
+    @media (max-width: 768px) {
+        font-size: 13px;
+    }
 }
 
 .form-group input::placeholder {
@@ -330,6 +420,10 @@ body {
     font-size: 20px;
     font-weight: 400;
     letter-spacing: 0.5px;
+
+    @media (max-width: 768px) {
+        font-size: 13px;
+    }
 }
 
 .form-group input:focus {
@@ -357,6 +451,13 @@ body {
     cursor: pointer;
     transition: background-color 0.3s ease;
     margin-top: 20px;
+
+    @media (max-width: 768px) {
+        width: 50%;
+        margin: 0 auto;
+        font-size: 12px;
+        line-height: 18px;
+    }
 }
 
 .submit-btn:hover {
@@ -371,22 +472,44 @@ body {
     line-height: 50px;
     letter-spacing: 5%;
     color: #FFFFFF;
+
+    h6 {
+        width: 70%;
+    }
+
+    @media (max-width: 768px) {
+        font-size: 18px;
+        line-height: 30px;
+        text-align: center;
+        padding-bottom: 20px;
+
+        h6 {
+            width: 60%;
+            margin: 0 auto;
+        }
+    }
+}
+
+.is-desktop {
+    display: block;
+}
+
+.is-mobile {
+    display: none;
 }
 
 /* Responsive Design */
 @media (max-width: 1024px) {
+    .is-desktop {
+        display: none;
+    }
+
+    .is-mobile {
+        display: block;
+    }
+
     .container {
         flex-direction: column;
-    }
-
-    .main-title {
-        font-size: 36px;
-        margin-top: 60px;
-        width: 60%;
-    }
-
-    .event-type {
-        font-size: 28px;
     }
 
     .event-name {
@@ -398,14 +521,6 @@ body {
     .form-row {
         flex-direction: column;
         gap: 15px;
-    }
-
-    .main-title {
-        font-size: 28px;
-    }
-
-    .event-type {
-        font-size: 24px;
     }
 
     .event-name {
